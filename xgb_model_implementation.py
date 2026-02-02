@@ -92,11 +92,6 @@ numeric_features_rfe = ['NumberOfMetforminRx', 'NoOfHospitalisations', 'NoOfOPED
                     'P12MNoOfAsthAttacks', 'P6MNoOfAsthAttacks', 'P3MNoOfAsthAttacks']
 
 
-## ----- Outlier detection
-
-
-
-
 # Comparing previous method
 # categorical_features = ['DHB', 'CohortYear', 'DeprivationQuintile']
 
