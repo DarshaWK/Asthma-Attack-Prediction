@@ -493,7 +493,7 @@ plt.title('Feature Importance')
 plt.xlabel("Permutation Importance")
 #%% Save the Model
 # change directory
-cd_path = r"C:\Users\dbf1941\OneDrive - AUT University\Python-projects\asthma_attack_risk_prediction\AdjustedDataset-Andy\LR\LR-NoSample\Tuned Model"
+cd_path = r"LR\LR-NoSample\Tuned Model"
 os.chdir(cd_path)
 # print("Current working directory: {0}".format(os.getcwd()))
 # pickle.dump(model_best, open("rf_smote_100000_model_base.pkl", "wb"))
@@ -501,8 +501,7 @@ pickle.dump(model_best, open("lr_noSample_tunedModel.pickle", "wb"))
 
 #%% Finding threshold & Re-run the model - Downsample
 # Load the model
-load_path = r"C:\Users\dbf1941\OneDrive - AUT University\Python-projects\asthma_attack_risk_prediction\AdjustedDataset-Andy\LR\LR-Downsample"
-# load_path = r"C:\Users\dbf1941\OneDrive - AUT University\Python-projects\asthma_attack_risk_prediction\Random Forest\RF_Tuned_Models_FullSet\RF_NoSample_Num_NoDomIndxMonth_fullset_bestModel"
+load_path = r"LR\LR-Downsample"
 load_model = pickle.load(open(os.path.join(load_path,"lr_down_tunedModel.pickle"),'rb'))
 
 # fit the transformer on training data
@@ -561,11 +560,10 @@ print(cls_report_final_bestThreshold)
 
 # X_test2_transformed = preprocessor.transform(X_test2)
 # plot_roc_curve(load_model, X_test2_transformed, y_test2, name="LR-Downsample")
+
 #%% Finding threshold & Re-run the model - SMOTE
 # Load the model
-load_path = r"C:\Users\dbf1941\OneDrive - AUT University\Python-projects\asthma_attack_risk_prediction\AdjustedDataset-Andy\LR\LR-SMOTE"
-# load_path = r"C:\Users\dbf1941\OneDrive - AUT University\Python-projects\asthma_attack_risk_prediction\Random Forest\RF_Tuned_Models_FullSet\RF_NoSample_Num_NoDomIndxMonth_fullset_bestModel"
-# load_model = pickle.load(open(os.path.join(load_path,"lr_Downsample_fullSet_numeric_TE_model_best.pickle"),'rb'))
+load_path = r"LR\LR-SMOTE"
 
 # fit the transformer on training data
 preprocessor.fit(X_train, y_train)
@@ -620,10 +618,10 @@ print(cls_report_final_bestThreshold)
 
 # X_test2_transformed = preprocessor.transform(X_test2)
 plot_roc_curve(load_model, X_test2_transformed, y_test2, name="LR-SMOTE")
+
 #%% Finding threshold & Re-run the model - NoSample
 # Load the model
-load_path = r"C:\Users\dbf1941\OneDrive - AUT University\Python-projects\asthma_attack_risk_prediction\Logistic Regression\LR_NoSample_Numeric_NoDomIndxMonth_fullSet_bestModel"
-# load_path = r"C:\Users\dbf1941\OneDrive - AUT University\Python-projects\asthma_attack_risk_prediction\Random Forest\RF_Tuned_Models_FullSet\RF_NoSample_Num_NoDomIndxMonth_fullset_bestModel"
+load_path = r"Logistic Regression\LR_NoSample_Numeric_NoDomIndxMonth_fullSet_bestModel"
 load_model = pickle.load(open(os.path.join(load_path,"lr_NoSample_best.pickle"),'rb'))
 
 # fit the transformer on training data
