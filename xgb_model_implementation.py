@@ -28,14 +28,9 @@ from joblib import dump,load
 from scikitplot.metrics import plot_roc_curve
 from matplotlib import pyplot as plt
 # %matplotlib inline
-#%% Data Processing
-# cd_path = r"C:\Users\dbf1941\OneDrive - AUT University\Python-projects\asthma_attack_risk_prediction\XGBoost\XGB_SMOTE_Numeric_TE_fullSet\n_estimators 1000"
-# cd_path = r"C:\Users\dbf1941\OneDrive - AUT University\Python-projects\asthma_attack_risk_prediction\XGBoost\XGB_Tuned_Model_fullSet\XGB_SMOTE_Num_NoDomIndxMonth_fullset_bestModel"
-# data_path = r"C:\Users\Darsha Jayamini\OneDrive - AUT University\Python-projects\asthma_attack_risk_prediction\data"
-cd_path = r"C:\Users\dbf1941\OneDrive - AUT University\Python-projects\asthma_attack_risk_prediction\AdjustedDataset-Andy\XGB\XGB_NoSample"
-data_path = r"C:\Users\dbf1941\OneDrive - AUT University\Python-projects\asthma_attack_risk_prediction\AdjustedDataset-Andy"
 
 ### Import Data ###
+data_path = r"asthma_attack_risk_prediction\data"
 train_data = pd.read_csv(os.path.join(data_path,"DerivationSet_AsthmaPatients_Over6YearsOfAge_Quarter5.csv"))
 test_data = pd.read_csv(os.path.join(data_path,"ValidationSet_AsthmaPatients_Over6YearsOfAge_Quarter5.csv"))
 
