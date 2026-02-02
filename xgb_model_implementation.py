@@ -372,7 +372,7 @@ toc = time.perf_counter()
 evaluateFinalModel(y_test_rfe,y_pred_proba_class1,y_pred_base)
 #%% Save the Model ###
 # change directory
-cd_path = r"C:\Users\dbf1941\OneDrive - AUT University\Python-projects\asthma_attack_risk_prediction\AdjustedDataset-Andy\XGB\RFE\NoSample"
+cd_path = r"XGB\RFE\NoSample"
 os.chdir(cd_path)
 # print("Current working directory: {0}".format(os.getcwd()))
 # pickle.dump(model_base, open("XGB_smote_100000_model_base.pkl", "wb"))
@@ -1150,10 +1150,11 @@ os.chdir(cd_path)
 # print("Current working directory: {0}".format(os.getcwd()))
 # pickle.dump(model_best, open("rf_smote_100000_model_base.pkl", "wb"))
 pickle.dump(model_best_nosample, open("xgb_rfe_noSample_tunedModel.pickle", "wb"))
+
 #%% Finding threshold & Re-run the model - Down-sample
 # Load the model
-# load_path = r"C:\Users\dbf1941\OneDrive - AUT University\Python-projects\asthma_attack_risk_prediction\XGBoost\XGB_Tuned_Model_fullSet\XGB_Downsample_Num_NoDomIndxMonth_fullset_bestModel"
-# load_path = r"C:\Users\dbf1941\OneDrive - AUT University\Python-projects\asthma_attack_risk_prediction\AdjustedDataset-Andy\XGB\XGB_Downsample\Tuned model"
+# load_path = r"XGBoost\XGB_Tuned_Model_fullSet\XGB_Downsample_Num_NoDomIndxMonth_fullset_bestModel"
+# load_path = r"XGB\XGB_Downsample\Tuned model"
 # load_model = pickle.load(open(os.path.join(load_path,"xgb_Downsample_fullSet_numeric_NoDomicileIndxMonth_best_model.pickle"),'rb'))
 
 # fit the transformer on training data
@@ -1197,8 +1198,8 @@ X_test2_transformed = preprocessor.transform(X_test2)
 plot_roc_curve(load_model, X_test2_transformed, y_test2, name="XGB-Down")
 #%% Finding threshold & Re-run the model - NoSample
 # Load the model
-# load_path = r"C:\Users\dbf1941\OneDrive - AUT University\Python-projects\asthma_attack_risk_prediction\XGBoost\XGB_Tuned_Model_fullSet\XGB_Downsample_Num_NoDomIndxMonth_fullset_bestModel"
-load_path = r"C:\Users\dbf1941\OneDrive - AUT University\Python-projects\asthma_attack_risk_prediction\XGBoost\XGB_Tuned_Model_fullSet\XGB_NoSample_Num_NoDomIndxMonth_fullset_bestModel"
+# load_path = r"XGB_Downsample_Num_NoDomIndxMonth_fullset_bestModel"
+load_path = r"XGB_Tuned_Model_fullSet\XGB_NoSample_Num_NoDomIndxMonth_fullset_bestModel"
 load_model = pickle.load(open(os.path.join(load_path,"xgb_NoSample_fullSet_numeric_NoDomicileIndxMonth_best_model.pickle"),'rb'))
 
 # fit the transformer on training data
@@ -1242,8 +1243,8 @@ X_test2_transformed = preprocessor.transform(X_test2)
 plot_roc_curve(load_model, X_test2_transformed, y_test2, name="XGB-NoSample")
 #%% Finding threshold & Re-run the model - SMOTE
 # Load the model
-# load_path = r"C:\Users\dbf1941\OneDrive - AUT University\Python-projects\asthma_attack_risk_prediction\XGBoost\XGB_Tuned_Model_fullSet\XGB_Downsample_Num_NoDomIndxMonth_fullset_bestModel"
-load_path = r"C:\Users\dbf1941\OneDrive - AUT University\Python-projects\asthma_attack_risk_prediction\XGBoost\XGB_Tuned_Model_fullSet\XGB_SMOTE_Num_NoDomIndxMonth_fullset_bestModel"
+# load_path = r"XGB_Tuned_Model_fullSet\XGB_Downsample_Num_NoDomIndxMonth_fullset_bestModel"
+load_path = r"XGB_Tuned_Model_fullSet\XGB_SMOTE_Num_NoDomIndxMonth_fullset_bestModel"
 load_model = pickle.load(open(os.path.join(load_path,"xgb_SMOTE_fullSet_numeric_NoDomicileIndxMonth_best_model.pickle"),'rb'))
 
 # fit the transformer on training data
@@ -1295,278 +1296,6 @@ test_data_rfe_copy["predictions"] = y_pred_class1
 
 test_data_rfe_copy.to_csv("xgb_down_rfe_predictions.csv", index=False)
 
-
-#%%  --------------  COMBINED techniques: Random Undersampling and SMOTE-------------
-
-# Train and Test Base model
-tic = time.perf_counter()
-model_base = XGBClassifier(random_state=93186,
-                                    n_jobs=-1,
-                                    verbosity=1)
-                                   # n_estimators=100, #1000
-                                    #use_label_encoder=False) #for future changes
-
-rs_down = RandomUnderSampler( random_state=93196, sampling_strategy=0.5)
-rs_smote = SMOTE(random_state=93196, sampling_strategy=0.1)
-
-
-pipe_base = Pipeline(steps=[ ("preprocessor",preprocessor_rfe),
-                        ("sampler_up", rs_smote),
-                         ("sampler_down",rs_down),
-                        ("classifier",model_base)
-                ]
-            )
-
-for i in range(1,101):
-    pipe_base.fit(X_train_rfe,y_train_rfe)
-    print(i)
-    
-y_pred_base = pipe_base.predict(X_test_rfe)
-y_pred_proba_base = pipe_base.predict_proba(X_test_rfe)
-y_pred_proba_class1 = y_pred_proba_base[::,1]
-toc = time.perf_counter() 
-
-print("Runtime: ",toc-tic)
-# Evaluate final model
-evaluateFinalModel(y_test_rfe,y_pred_proba_class1,y_pred_base)
-
-#%% Hyperparameter tuning - COMBINED techniques: RUS + SMOTE
-
-# Initially keep n_estimators=100, and others as the base estimator, then this will be increased later
-
-##  Tune max_depth and min_child_weight with the above found n_estimators and other fixed params
-param_grid1 = {
- 'classifier__max_depth':range(3,10,2), #[3,5,7,9]
- 'classifier__min_child_weight':range(1,6,2) #[1,3,5]
-}
-
-xgb_tune1 = XGBClassifier(learning_rate = 0.1,
-                         n_estimators=100,
-                         gamma=0,
-                         subsample=0.8,
-                         colsample_bytree=0.8,
-                         objective= 'binary:logistic',
-                         scale_pos_weight=1,
-                         seed=27,
-                         eval_metric ="auc")
-
-rs_down = RandomUnderSampler( random_state=93196, sampling_strategy=0.5)
-rs_smote = SMOTE(random_state=93196, sampling_strategy=0.1)
-
-pipe_tune1 = Pipeline(steps=[ ("preprocessor",preprocessor_rfe),
-                        ("sampler_up", rs_smote),
-                         ("sampler_down",rs_down),
-                        ("classifier",xgb_tune1)
-                ]
-            )
-
-gs_grid1 = GridSearchCV(pipe_tune1, param_grid1, scoring="roc_auc", n_jobs=-1, cv=5)
-gs_grid1.fit(X_train_rfe, y_train_rfe)
-gs_grid1_cvResults = gs_grid1.cv_results_ 
-print(f"Best params: {gs_grid1.best_params_}\nBest score: {gs_grid1.best_score_}")
-# Best params: {'classifier__max_depth': 5, 'classifier__min_child_weight': 3}
-# Best score: 0.7551662372070587
-
-# further investiagting max_depth and min_child_weight
-param_grid1_1 = {
- 'classifier__max_depth':[4,5,6],
- 'classifier__min_child_weight':[2,3,4]
-}
-
-xgb_tune1_1 = XGBClassifier(learning_rate = 0.1,
-                         n_estimators=100,
-                         gamma=0,
-                         subsample=0.8,
-                         colsample_bytree=0.8,
-                         objective= 'binary:logistic',
-                         scale_pos_weight=1,
-                         seed=27,
-                         eval_metric ="auc")
-
-rs_down = RandomUnderSampler( random_state=93196, sampling_strategy=0.2)
-rs_smote = SMOTE(random_state=93196, sampling_strategy=0.1)
-
-pipe_tune1_1 = Pipeline(steps=[ ("preprocessor",preprocessor_rfe),
-                        ("sampler_up", rs_smote),
-                         ("sampler_down",rs_down),
-                        ("classifier",xgb_tune1_1)
-                ]
-            )
-
-
-gs_grid1_1 = GridSearchCV(pipe_tune1_1, param_grid1_1, scoring="roc_auc", n_jobs=-1, cv=5)
-gs_grid1_1.fit(X_train_rfe, y_train_rfe)
-gs_grid1_1_cvResults = gs_grid1_1.cv_results_ 
-print(f"Best params: {gs_grid1_1.best_params_}\nBest score: {gs_grid1_1.best_score_}")
-# Best params: {'classifier__max_depth': 5, 'classifier__min_child_weight': 3}
-# Best score: 0.7551662372070587
-
-# Further tuning for min_child_weight - not required for SMOTE
-# param_grid1_2 = {
-#  'classifier__min_child_weight':[4,5,6]
-# }
-
-# xgb_tune1_2 = XGBClassifier(learning_rate = 0.1,
-#                          n_estimators=100,
-#                          gamma=0,
-#                          subsample=0.8,
-#                          colsample_bytree=0.8,
-#                          objective= 'binary:logistic',
-#                          scale_pos_weight=1,
-#                          seed=27,
-#                          eval_metric ="auc",
-#                          max_depth=6)
-
-# # rs_tune1_2 = RandomUnderSampler(random_state=93196)
-# # rs = SMOTE(random_state=93196)
-
-# pipe_tune1_2 = Pipeline(steps=[ ("preprocessor",preprocessor),
-#                         # ("sampler",rs_tune1_2),
-#                         ("classifier",xgb_tune1_2),
-#                 ],
-#             )
-# gs_grid1_2 = GridSearchCV(pipe_tune1_2, param_grid1_2, scoring="roc_auc", n_jobs=-1, cv=5)
-# gs_grid1_2.fit(X_train, y_train)
-# # gs_grid1_2_cvResults = gs_grid1_1.cv_results_ 
-# print(f"Best params: {gs_grid1_2.best_params_}\nBest score: {gs_grid1_2.best_score_}")
-
-# Tune subsample and colsample_bytree
-param_grid2 = {
- 'classifier__subsample':[i/10.0 for i in range(6,10)],
- 'classifier__colsample_bytree':[i/10.0 for i in range(6,10)]
-}
-xgb_tune2 = XGBClassifier(learning_rate = 0.1,
-                         n_estimators=100,
-                         gamma=0,
-                         subsample=0.8,
-                         colsample_bytree=0.8,
-                         objective= 'binary:logistic',
-                         scale_pos_weight=1,
-                         seed=27,
-                         eval_metric ="auc",
-                         max_depth=5,
-                         min_child_weight=3)
-
-rs_down = RandomUnderSampler( random_state=93196, sampling_strategy=0.5)
-rs_smote = SMOTE(random_state=93196, sampling_strategy=0.1)
-
-pipe_tune2 = Pipeline(steps=[ ("preprocessor",preprocessor_rfe),
-                        ("sampler_up", rs_smote),
-                         ("sampler_down",rs_down),
-                        ("classifier",xgb_tune2)
-                ]
-            )
-
-gs_grid2 = GridSearchCV(pipe_tune2, param_grid2, scoring="roc_auc", n_jobs=-1, cv=5)
-gs_grid2.fit(X_train_rfe, y_train_rfe)
-gs_grid2_cvResults = gs_grid2.cv_results_ 
-print(f"Best params: {gs_grid2.best_params_}\nBest score: {gs_grid2.best_score_}")
-# Best params: {'classifier__colsample_bytree': 0.7, 'classifier__subsample': 0.8}
-# Best score: 0.7553900807583234
-
-# # Tune regularization parameter to avoid overfitting
-# param_grid3 = {
-#  'classifier__reg_alpha':[0, 0.001, 0.005, 0.01, 0.05, 0.1]
-# }
-
-#lower the learning rate
-param_grid3 = {'classifier__learning_rate': [0.01, 0.05, 0.1]}
-xgb_tune3 = XGBClassifier(gamma=0, 
-                          subsample=0.8,
-                         n_estimators =100, 
-                         colsample_bytree=0.7,
-                         objective= 'binary:logistic',
-                         scale_pos_weight=1, seed=27,
-                         eval_metric ="auc",
-                         max_depth=5, 
-                         min_child_weight=3)
-
-rs_down = RandomUnderSampler( random_state=93196, sampling_strategy=0.5)
-rs_smote = SMOTE(random_state=93196, sampling_strategy=0.1)
-
-pipe_tune3 = Pipeline(steps=[ ("preprocessor",preprocessor_rfe),
-                        ("sampler_up", rs_smote),
-                         ("sampler_down",rs_down),
-                        ("classifier",xgb_tune3)
-                ]
-            )
-
-gs_grid3 = GridSearchCV(estimator = pipe_tune3, 
-                         param_grid = param_grid3, 
-                         cv = 5, 
-                         scoring="roc_auc", 
-                         verbose=2, 
-                         n_jobs = -1,
-                         error_score='raise',
-                         return_train_score=True)
-gs_grid3.fit(X_train_rfe,y_train_rfe)
-print(f"Best params: {gs_grid3.best_params_}\nBest score: {gs_grid3.best_score_}")
-# Best params: {'classifier__learning_rate': 0.1}
-# Best score: 0.7553900807583234
-
-#Increasing number of trees
-param_grid4 = {'classifier__n_estimators': [100, 200, 500, 1000]} #, 2000
-xgb_tune4 = XGBClassifier(gamma=0,
-                         learning_rate=0.1,
-                         subsample=0.8,
-                         colsample_bytree=0.7,
-                         objective= 'binary:logistic',
-                         scale_pos_weight=1,
-                         seed=27,
-                         eval_metric ="auc",
-                         max_depth=5,
-                         min_child_weight=3)
-
-rs_down = RandomUnderSampler( random_state=93196, sampling_strategy=0.5)
-rs_smote = SMOTE(random_state=93196, sampling_strategy=0.1)
-
-pipe_tune4 = Pipeline(steps=[ ("preprocessor",preprocessor_rfe),
-                        ("sampler_up", rs_smote),
-                         ("sampler_down",rs_down),
-                        ("classifier",xgb_tune4)
-                ]
-            )
-
-gs_grid4 = GridSearchCV(estimator = pipe_tune4, 
-                         param_grid = param_grid4, 
-                         cv = 5, 
-                         scoring="roc_auc", 
-                         verbose=2, 
-                         n_jobs = -1,
-                         error_score='raise',
-                         return_train_score=True)
-gs_grid4.fit(X_train_rfe,y_train_rfe)
-print(f"Best params: {gs_grid4.best_params_}\nBest score: {gs_grid4.best_score_}")
-# Best params: {'classifier__n_estimators': 100}
-# Best score: 0.7553900807583234
-
-#%% Retraining the best model - Combined RUS + SMOTE
-tic = time.perf_counter()
-# Best model
-model_bestTuned = XGBClassifier(random_state = 93186,
-                            n_jobs = -1,
-                            verbosity = 0,
-                            seed = 456,
-                            learning_rate = 0.1,
-                            n_estimators = 100, 
-                            gamma = 0, 
-                            subsample = 0.8,
-                            colsample_bytree = 0.7,
-                            objective = 'binary:logistic',
-                            scale_pos_weight = 1,
-                            eval_metric = "auc",
-                            max_depth = 5,
-                            min_child_weight = 3)
-
-rs_down = RandomUnderSampler( random_state=93196, sampling_strategy=0.5)
-rs_smote = SMOTE(random_state=93196, sampling_strategy=0.1)
-
-pipe_tune_best = Pipeline(steps=[ ("preprocessor",preprocessor_rfe),
-                        ("sampler_up", rs_smote),
-                         ("sampler_down",rs_down),
-                        ("classifier",model_bestTuned)
-                ]
-            )
 
 # RFE Execution
 # for i in range(1,101):
