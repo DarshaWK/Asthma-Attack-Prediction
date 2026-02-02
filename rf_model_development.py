@@ -33,15 +33,9 @@ rcParams['figure.figsize'] = 5,5
 plt.rcParams.update({'font.size': 14})
 plt.rcParams.update({'figure.dpi':300})
 #%% Data Import and processing
-# cd_path = r"C:\Users\dbf1941\OneDrive - AUT University\Python-projects\asthma_attack_risk_prediction\Random Forest\RF_Tuned_Models_FullSet\RF_NoSample_Numeric_TE_fullSet"
-# data_path = r"C:\Users\Darsha Jayamini\OneDrive - AUT University\Python-projects\asthma_attack_risk_prediction\data"
-# cd_path = r"C:\Users\dbf1941\OneDrive - AUT University\Python-projects\asthma_attack_risk_prediction\AdjustedDataset-Andy\RF\RF-NoSample"
-# data_path = r"C:\Users\Darsha Jayamini\OneDrive - AUT University\Python-projects\asthma_attack_risk_prediction\data"
-data_path = r"C:\Users\dbf1941\OneDrive - AUT University\Python-projects\asthma_attack_risk_prediction\AdjustedDataset-Andy"
+data_path = r"asthma_attack_risk_prediction\data"
 
 ### -----------Import Data ###
-# train_data = pd.read_csv(os.path.join(data_path,"DerivationSet_AsthmaPatients_Over6YearsOfAge_Quarter5.csv"))
-# test_data = pd.read_csv(os.path.join(data_path,"ValidationSet_AsthmaPatients_Over6YearsOfAge_Quarter5.csv"))
 train_data = pd.read_csv(os.path.join(data_path,"DerivationSet_AsthmaPatients_Over12YearsOfAge_Quarter5.csv"))
 test_data = pd.read_csv(os.path.join(data_path,"ValidationSet_AsthmaPatients_Over12YearsOfAge_Quarter5.csv"))
 
